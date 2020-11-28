@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PMSCS-620 (Summer 2020) Assignment 1 by Ahmad Wahid Masud (CSE202002085)">
+    <title>Calculator | Wahid</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+        :root {
+            --btn-width: 4.5rem;
+            --btn-height: 4.5rem;
+            --margin: 1rem;
+        }
+
+        body {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            cursor: default;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            box-shadow: 10px 10px 14px -9px #000;
+            background-color: #3A4655;
+        }
+
+        .row {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: normal;
+        }
+
+        span {
+            width: calc(var(--btn-width) * 4 - var(--margin) * 2);
+            word-wrap: break-word;
+            margin: var(--margin);
+            text-align: right;
+            min-height: 2.5rem;
+        }
+
+        span.equation {
+            color: #b0b9c5;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #677280;
+        }
+
+        span.result {
+            margin-top: calc(- var(--margin));
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        button {
+            width: var(--btn-width);
+            height: var(--btn-height);
+            color: #fff;
+            border: 1px solid #000;
+            background-color: #425062;
+            background-position: center;
+            transition: background 0.3s;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 100;
+            font-size: 1.5rem;
+        }
+
+        button:hover {
+            background: #47a7f5 radial-gradient(circle, transparent 1%, #47a7f5 1%) center/15000%;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        button.btn-double-width {
+            width: calc(var(--btn-width) * 2);
+        }
+
+        .non-operand {
+            background-color: #505c6b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <span class="equation"></span>
+        </div>
+        <div class="row">
+            <span class="result"></span>
+        </div>
+        <div class="row">
+            <button type="button" id="btn-all-clear" class="non-operand">AC</button>
+            <button type="button" id="btn-clear" class="non-operand">C</button>
+            <button type="button" id="btn-percent" class="non-operand">%</button>
+            <button type="button" id="btn-divide" class="non-operand">&divide;</button>
+        </div>
+        <div class="row">
+            <button type="button" id="btn-7">7</button>
+            <button type="button" id="btn-8">8</button>
+            <button type="button" id="btn-9">9</button>
+            <button type="button" id="btn-multiply" class="non-operand">X</button>
+        </div>
+        <div class="row">
+            <button type="button" id="btn-4">4</button>
+            <button type="button" id="btn-5">5</button>
+            <button type="button" id="btn-6">6</button>
+            <button type="button" id="btn-minus" class="non-operand">-</button>
+        </div>
+        <div class="row">
+            <button type="button" id="btn-1">1</button>
+            <button type="button" id="btn-2">2</button>
+            <button type="button" id="btn-3">3</button>
+            <button type="button" id="btn-plus" class="non-operand">+</button>
+        </div>
+        <div class="row">
+            <button type="button" class="btn-double-width" id="btn-0">0</button>
+            <button type="button" id="btn-dot">&bull;</button>
+            <button type="button" id="btn-equal" class="non-operand">=</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const symbolDictionary = [
+            {
+                'id': 'btn-1',
+                'value': '1',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-2',
+                'value': '2',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-3',
+                'value': '3',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-4',
+                'value': '4',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-5',
+                'value': '5',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-6',
+                'value': '6',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-7',
+                'value': '7',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-8',
+                'value': '8',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-9',
+                'value': '9',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-0',
+                'value': '0',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-plus',
+                'value': '+',
+                'type': 'operator'
+            },
+            {
+                'id': 'btn-minus',
+                'value': '-',
+                'type': 'operator'
+            },
+            {
+                'id': 'btn-multiply',
+                'value': '*',
+                'type': 'operator'
+            },
+            {
+                'id': 'btn-divide',
+                'value': '/',
+                'type': 'operator'
+            },
+            {
+                'id': 'btn-equal',
+                'value': ['=', 'Enter'],
+                'type': 'symbol'
+            },
+            {
+                'id': 'btn-percent',
+                'value': '%',
+                'type': 'operator'
+            },
+            {
+                'id': 'btn-dot',
+                'value': '.',
+                'type': 'operand'
+            },
+            {
+                'id': 'btn-clear',
+                'value': 'Backspace',
+                'type': 'symbol'
+            },
+        ];
+
+        $(document).ready(function () {
+            $('body').on('keydown', function (e) {
+                let key = e.originalEvent.key;
+                let symbolJSON = symbolDictionary.filter(x => x.value === key || x.value.includes(key));
+                if (symbolJSON.length)
+                    $(`#${symbolJSON[0].id}`).trigger('click');
+            });
+
+            $('button').on('click', function () {
+                $(this).css('background-color', '#47a7f5').delay(200).queue(() => {
+                    $(this).css('background-color', '');
+                    $(this).dequeue();
+                });
+
+                let symbolJSON = symbolDictionary.filter(x => x.id === $(this).prop('id'));
+                if (symbolJSON.length) {
+                    executeOperation(symbolJSON[0]);
+                }
+
+                if ($(this).prop('id') === 'btn-all-clear') {
+                    executeOperation(null);
+                }
+            });
+        });
+
+        function executeOperation(json) {
+            let equation = $('.equation').text();
+
+            if (json) {
+                if (json.type !== 'symbol') {
+                    $('.equation').text(
+                        equation.length
+                            ? symbolDictionary.filter(x => x.value === json.value && x.type === 'operator').length
+                                ? `${equation} ${json.value}`
+                                : symbolDictionary.filter(x => x.value === equation.charAt(equation.length - 1) && x.type === 'operator').length
+                                    ? `${equation} ${json.value}`
+                                    : `${equation}${json.value}`
+                            : json.value);
+                }
+                else if (json.value === 'Backspace') {
+                    let equation = $('.equation').text();
+                    $('.equation').text(equation.substring(0, equation.length - 1).trim());
+                    $('.result').text($('.equation').text() ? $('.result').text() : '');
+                }
+            }
+            else {
+                $('.equation').text('');
+                $('.result').text('');
+            }
+
+            try {
+                $('.result').text(eval($('.equation').text()));
+            }
+            catch { }
+        }
+    </script>
+</body>
+
+</html>
